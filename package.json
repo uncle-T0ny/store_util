@@ -5,5 +5,23 @@
   "main": "index.js",
   "repository": "https://github.com/uncle-T0ny/store_util",
   "author": "Anton Romankov",
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "// eslint": "eslint",
+    "lint": "eslint src test docs migrations",
+    "lint-pretty-format": "eslint --format node_modules/eslint-friendly-formatter src test docs migrations"
+  },
+  "dependencies": {
+    "chalk": "^2.4.1",
+    "clear": "^0.1.0",
+    "cli-highlight": "^2.0.0",
+    "clui": "^0.3.6",
+    "configstore": "^4.0.0",
+    "figlet": "^1.2.0",
+    "inquirer": "^6.2.0",
+    "minimist": "^1.2.0"
+  },
+  "bin": {
+    "sut": "./index.js"
+  }
 }

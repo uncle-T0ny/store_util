@@ -1,0 +1,82 @@
+{
+  "root": true,
+  "env": {
+    "node": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 8,
+    "sourceType": "module"
+  },
+  "extends": [
+    "airbnb"
+  ],
+  "rules": {
+    "no-console": "off",
+    "no-plusplus": "off",
+    "padded-blocks": "off",
+    "require-yield": "off",
+    "global-require": "off",
+    "spaced-comment": "off",
+    "no-param-reassign": "off",
+    "consistent-return": "off",
+    "no-underscore-dangle": "off",
+    "no-nested-ternary": "off",
+    "import/no-dynamic-require": "off",
+    "no-await-in-loop": "off",
+    "no-return-await": "off",
+    "camelcase": "off",
+    "class-methods-use-this": "off",
+    "arrow-parens": ["error", "always"],
+    "max-len": ["warn", 200],
+    "strict": ["off", "global"],
+    "comma-dangle": ["error", "never"],
+    "generator-star-spacing": ["error", { "before": true, "after": false }],
+    "no-restricted-syntax": ["error", "ForInStatement", "LabeledStatement", "WithStatement"],
+    "brace-style": ["error", "1tbs", { "allowSingleLine": true }],
+    "implicit-arrow-linebreak": ["error", "beside"],
+    "object-curly-newline": ["error", {
+      "ObjectExpression": { "minProperties": 10, "multiline": true, "consistent": true },
+      "ObjectPattern": { "minProperties": 10, "multiline": true, "consistent": true },
+      "ImportDeclaration": { "minProperties": 10, "multiline": true, "consistent": true },
+      "ExportDeclaration": { "minProperties": 10, "multiline": true, "consistent": true }
+    }],
+    "no-restricted-properties": ["error", {
+      "object": "arguments",
+      "property": "callee",
+      "message": "arguments.callee is deprecated"
+    }, {
+      "object": "global",
+      "property": "isFinite",
+      "message": "Please use Number.isFinite instead"
+    }, {
+      "object": "self",
+      "property": "isFinite",
+      "message": "Please use Number.isFinite instead"
+    }, {
+      "object": "window",
+      "property": "isFinite",
+      "message": "Please use Number.isFinite instead"
+    }, {
+      "object": "global",
+      "property": "isNaN",
+      "message": "Please use Number.isNaN instead"
+    }, {
+      "object": "self",
+      "property": "isNaN",
+      "message": "Please use Number.isNaN instead"
+    }, {
+      "object": "window",
+      "property": "isNaN",
+      "message": "Please use Number.isNaN instead"
+    }, {
+      "property": "__defineGetter__",
+      "message": "Please use 'object'.define'property' instead."
+    }, {
+      "property": "__defineSetter__",
+      "message": "Please use 'object'.define'property' instead."
+    }],
+    "func-names": ["warn", "as-needed"],
+    "curly": ["error", "all"],
+    "prefer-promise-reject-errors": "off"
+  }
+}
