@@ -7,9 +7,6 @@
     "ecmaVersion": 8,
     "sourceType": "module"
   },
-  "extends": [
-    "airbnb"
-  ],
   "rules": {
     "no-console": "off",
     "no-plusplus": "off",

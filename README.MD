@@ -4,7 +4,6 @@ TODO:
 - Create modern command line color interface.
 - Determinate the notes format.
 - Determinate the util usage format.
--
 
 
 chalk — colorizes the output

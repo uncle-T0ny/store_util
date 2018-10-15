@@ -12,15 +12,26 @@
     "lint-pretty-format": "eslint --format node_modules/eslint-friendly-formatter src test docs migrations"
   },
   "dependencies": {
+    "adm-zip": "^0.4.11",
     "chalk": "^2.4.1",
     "clear": "^0.1.0",
-    "cli-highlight": "^2.0.0",
+    "cli-input": "^0.2.0",
     "cli-md": "^1.2.0",
+    "cli-usage": "^0.1.8",
     "clui": "^0.3.6",
     "configstore": "^4.0.0",
+    "download": "^7.1.0",
+    "eslint": "^5.7.0",
+    "exec": "^0.2.1",
     "figlet": "^1.2.0",
-    "inquirer": "^6.2.0",
-    "minimist": "^1.2.0"
+    "figures": "^2.0.0",
+    "install": "^0.12.1",
+    "marked": "^0.5.1",
+    "marked-terminal": "^3.1.1",
+    "minimist": "^1.2.0",
+    "node-dir": "^0.1.17",
+    "npm": "^6.4.1",
+    "rimraf": "^2.6.2"
   },
   "bin": {
     "sut": "./index.js"
