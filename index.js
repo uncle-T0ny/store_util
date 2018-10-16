@@ -135,7 +135,18 @@ const run = async () => {
       const val = res.map.type;
       const idx = stockContent.indexOf(`[tags]: <> (${val}`);
       const endIdx = stockContent.substr(idx, stockContent.length).indexOf('[tags-end]');
-      console.log(`${marked(stockContent.substr(idx, endIdx))}`);
+
+      const regexp = new RegExp("\\[tags\\]: <> (.*" + val + ".*)", 'g');
+      let match, matches = [];
+
+      while ((match = regexp.exec(stockContent)) !== null) {
+        matches.push(match.index);
+      }
+
+      matches.forEach((matchIdx) => {
+        const endIdx = stockContent.substr(matchIdx, stockContent.length).indexOf('[tags-end]');
+        console.log(`${marked(stockContent.substr(matchIdx, endIdx))}`)
+      });
     }
   });
 };
