@@ -16,10 +16,12 @@ const AdmZip = require('adm-zip');
 const prompt = require('cli-input');
 const sets = prompt.sets;
 const definitions = sets.definitions;
+const homedir = require('os').homedir();
 
 const { readFiles } = require('./fileReader');
 
-const stockFolder = '/tmp/stock/';
+const stockFolder = `${homedir}/.stock/`;
+const stockConfigFilePath = `${homedir}/.stock/config.json`;
 const temporaryFolder = 'temp';
 
 marked.setOptions({
@@ -27,6 +29,8 @@ marked.setOptions({
 });
 
 let stockContent = '';
+let config;
+
 
 const downloadRepo = async (githubUrl) => {
   const archiveUrl = `${githubUrl}/archive/master.zip`;
@@ -50,6 +54,20 @@ const readStockContent = async () => {
   stockContent = await readFiles(stockPath);
 };
 
+const printMatches = (val) => {
+  const regexp = new RegExp("\\[tags\\]: <> (.*" + val + ".*)", 'g');
+  let match, matches = [];
+
+  while ((match = regexp.exec(stockContent)) !== null) {
+    matches.push(match.index);
+  }
+
+  matches.forEach((matchIdx) => {
+    const endIdx = stockContent.substr(matchIdx, stockContent.length).indexOf('[tags-end]');
+    console.log(`${marked(stockContent.substr(matchIdx, endIdx))}`)
+  });
+};
+
 const run = async () => {
   clear();
 
@@ -60,18 +78,33 @@ const run = async () => {
   );
 
   const isRepoExists = fs.existsSync(stockFolder);
+  const isConfigExists = fs.existsSync(stockFolder);
   const isUpdateRepo = argv.update;
 
   if (isUpdateRepo && isRepoExists) {
     const status = new Spinner('Updating stock repository...');
 
+    if (!isConfigExists) {
+      console.log(`Config folder not found.`);
+      process.exit();
+    } else {
+      config = JSON.parse(fs.readFileSync(stockConfigFilePath));
+    }
+
     status.start();
-    await downloadRepo('https://github.com/uncle-T0ny/stock2');
+    await downloadRepo(config.repoUrl);
     status.stop();
   }
 
   if (isRepoExists) {
     await readStockContent();
+  }
+
+  // search notes by tags and exit
+  const tags = argv._ ? argv._.join(' ') : '';
+  if (tags) {
+    printMatches(tags);
+    process.exit();
   }
 
   if (!isRepoExists) {
@@ -107,6 +140,14 @@ const run = async () => {
 
           await readStockContent();
 
+
+          if (!isConfigExists) {
+            config = {
+              repoUrl: githubUrl
+            };
+            fs.writeFileSync(stockConfigFilePath, JSON.stringify(config));
+          }
+
           resolve();
         }
       });
@@ -133,20 +174,7 @@ const run = async () => {
 
     if(res && res.map) {
       const val = res.map.type;
-      const idx = stockContent.indexOf(`[tags]: <> (${val}`);
-      const endIdx = stockContent.substr(idx, stockContent.length).indexOf('[tags-end]');
-
-      const regexp = new RegExp("\\[tags\\]: <> (.*" + val + ".*)", 'g');
-      let match, matches = [];
-
-      while ((match = regexp.exec(stockContent)) !== null) {
-        matches.push(match.index);
-      }
-
-      matches.forEach((matchIdx) => {
-        const endIdx = stockContent.substr(matchIdx, stockContent.length).indexOf('[tags-end]');
-        console.log(`${marked(stockContent.substr(matchIdx, endIdx))}`)
-      });
+      printMatches(val);
     }
   });
 };
