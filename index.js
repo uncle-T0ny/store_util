@@ -69,13 +69,6 @@ const printMatches = (val) => {
 };
 
 const run = async () => {
-  clear();
-
-  console.log(
-    chalk.yellow(
-      figlet.textSync('Store_util', { horizontalLayout: 'full' })
-    )
-  );
 
   const isRepoExists = fs.existsSync(stockFolder);
   const isConfigExists = fs.existsSync(stockFolder);
@@ -106,6 +99,14 @@ const run = async () => {
     printMatches(tags);
     process.exit();
   }
+
+  clear();
+
+  console.log(
+    chalk.yellow(
+      figlet.textSync('Store_util', { horizontalLayout: 'full' })
+    )
+  );
 
   if (!isRepoExists) {
     const askRepo = prompt({ infinite: false });
