@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="a8002189-d167-47de-bf9c-42848ad96d84" name="Default" comment="find muiltiple matches">
+    <list default="true" id="a8002189-d167-47de-bf9c-42848ad96d84" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/index.js" afterPath="$PROJECT_DIR$/index.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/README.MD" afterPath="$PROJECT_DIR$/README.MD" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
@@ -49,12 +49,12 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="README.MD" pinned="false" current-in-tab="false">
+      <file leaf-file-name="README.MD" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/README.MD">
           <provider selected="true" editor-type-id="split-provider[text-editor;MarkdownPreviewEditor]">
             <state split_layout="SPLIT">
-              <first_editor relative-caret-position="190">
-                <caret line="10" column="53" lean-forward="false" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="53" />
+              <first_editor relative-caret-position="139">
+                <caret line="8" column="14" lean-forward="true" selection-start-line="8" selection-start-column="14" selection-end-line="8" selection-end-column="14" />
                 <folding />
               </first_editor>
               <second_editor>
@@ -64,7 +64,7 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name=".gitignore" pinned="false" current-in-tab="true">
+      <file leaf-file-name=".gitignore" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/.gitignore">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="19">
@@ -140,8 +140,8 @@
         <option value="$PROJECT_DIR$/fileReader.js" />
         <option value="$PROJECT_DIR$/index1.js" />
         <option value="$PROJECT_DIR$/package.json" />
-        <option value="$PROJECT_DIR$/README.MD" />
         <option value="$PROJECT_DIR$/index.js" />
+        <option value="$PROJECT_DIR$/README.MD" />
       </list>
     </option>
   </component>
@@ -266,7 +266,7 @@
       <workItem from="1539529998861" duration="11796000" />
       <workItem from="1539611231831" duration="5295000" />
       <workItem from="1539723217460" duration="1026000" />
-      <workItem from="1540670018900" duration="1550000" />
+      <workItem from="1540670018900" duration="2391000" />
     </task>
     <task id="LOCAL-00001" summary="remove">
       <created>1539034617480</created>
@@ -289,11 +289,18 @@
       <option name="project" value="LOCAL" />
       <updated>1540669645577</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="clear console">
+      <created>1540758997295</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1540758997295</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="34317000" />
+    <option name="totallyTimeSpent" value="35158000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1669" height="956" extended-state="0" />
@@ -349,7 +356,8 @@
     <MESSAGE value="remove" />
     <MESSAGE value="first version" />
     <MESSAGE value="find muiltiple matches" />
-    <option name="LAST_COMMIT_MESSAGE" value="find muiltiple matches" />
+    <MESSAGE value="clear console" />
+    <option name="LAST_COMMIT_MESSAGE" value="clear console" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -739,19 +747,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/README.MD">
-      <provider selected="true" editor-type-id="split-provider[text-editor;MarkdownPreviewEditor]">
-        <state split_layout="SPLIT">
-          <first_editor relative-caret-position="190">
-            <caret line="10" column="53" lean-forward="false" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="53" />
-            <folding />
-          </first_editor>
-          <second_editor>
-            <js_state />
-          </second_editor>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/index.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1919">
@@ -765,6 +760,19 @@
         <state relative-caret-position="19">
           <caret line="1" column="6" lean-forward="false" selection-start-line="1" selection-start-column="6" selection-end-line="1" selection-end-column="6" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/README.MD">
+      <provider selected="true" editor-type-id="split-provider[text-editor;MarkdownPreviewEditor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="139">
+            <caret line="8" column="14" lean-forward="true" selection-start-line="8" selection-start-column="14" selection-end-line="8" selection-end-column="14" />
+            <folding />
+          </first_editor>
+          <second_editor>
+            <js_state />
+          </second_editor>
         </state>
       </provider>
     </entry>

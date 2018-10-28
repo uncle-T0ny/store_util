@@ -1,15 +1,34 @@
 
+### STORE UTIL
+This project created to help developers to store their programming(not only) notes.
 
-TODO:
-- Create modern command line color interface.
-- Determinate the notes format.
-- Determinate the util usage format.
+### Installation
 
 
-chalk — colorizes the output
-clear — clears the terminal screen
-clui — draws command-line tables, gauges and spinners
-figlet — creates ASCII art from text
-inquirer — creates interactive command-line user interface
-minimist — parses argument options
-configstore — easily loads and saves config without you having to think about where and how.
+```
+npm install -g
+```
+
+First of all, you have to create github repository where you will store notes
+in the markdown format. An example of such repository: [https://github.com/uncle-T0ny/stock2](https://github.com/uncle-T0ny/stock2)
+
+The **.md** notes file should store notes in the next format:
+a start note begins from "\[tags\]: <>" then declare the tags in
+figure braces "(tag, tag 2, etc..)"
+```
+[tags]: <> (sql, mysql, column description) Select all columns description by type
+```
+
+```
+the main note
+```
+
+and ends with "close note" tag
+```
+[tags-end]: <>
+```
+
+
+### TODO
+
+1. Adapt the Store_util for windows users
