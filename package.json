@@ -1,7 +1,7 @@
 {
   "name": "store_util",
-  "version": "0.0.1",
-  "description": "You can store your programmer notes here",
+  "version": "0.0.2",
+  "description": "This project created to help developers to store their programming(not only) notes.",
   "main": "index.js",
   "repository": "https://github.com/uncle-T0ny/store_util",
   "author": "Anton Romankov",
