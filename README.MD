@@ -8,7 +8,7 @@ In the terminal execute the following command:
 
 
 ```
-npm i -g store_util
+sudp npm i -g store_util
 ```
 
 First of all, you have to create github repository where you will store notes
@@ -55,4 +55,5 @@ sut sql
 
 ### TODO
 
-1. Adapt the Store_util for windows users
+1. Discover how to install repository without __sudo__
+2. Adapt the Store_util for windows users
