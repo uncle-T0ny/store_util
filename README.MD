@@ -55,5 +55,5 @@ sut sql
 
 ### TODO
 
-1. Discover how to install repository without __sudo__
-2. Adapt the Store_util for windows users
+1. - [ ] Discover how to install repository without __sudo__
+2. - [ ] Adapt the Store_util for windows users
