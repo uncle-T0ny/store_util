@@ -8,7 +8,7 @@ In the terminal execute the following command:
 
 
 ```
-sudp npm i -g store_util
+sudo npm i -g store_util
 ```
 
 First of all, you have to create github repository where you will store notes
