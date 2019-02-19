@@ -1,6 +1,6 @@
 {
   "name": "store_util",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "This project created to help developers to store their programming(not only) notes.",
   "main": "index.js",
   "repository": "https://github.com/uncle-T0ny/store_util",
