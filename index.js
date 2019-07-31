@@ -51,10 +51,10 @@ const downloadRepo = async (githubUrl, token) => {
     await initFolders();
 
     let tmpZipStream = fs.createWriteStream(stockFolder + temporaryFolder + '/' + archiveName);
-    console.log('https://' + `${githubUrl}` + archiveSuffix);
+
     const response = await axios({
         method: "get",
-        url: 'https://' + `${githubUrl}` + archiveSuffix,
+        url:`${githubUrl}` + archiveSuffix,
         responseType: "stream",
         headers: {
             "Authorization": 'token ' + `${token}`
