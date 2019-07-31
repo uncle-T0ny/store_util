@@ -33,28 +33,38 @@ marked.setOptions({
 
 let stockContent = '';
 let config;
+
+const initFolders = async () => {
+    return new Promise((resolve, reject) => {
+        if (!fs.existsSync(stockFolder)) {
+            fs.mkdirSync(stockFolder)
+        }
+        if (!fs.existsSync(stockFolder + temporaryFolder + '/')) {
+            fs.mkdirSync(stockFolder + temporaryFolder + '/')
+        }
+        resolve();
+    });
+}
+
 const downloadRepo = async (githubUrl, token) => {
-    if(!fs.existsSync(stockFolder)){
-        fs.mkdirSync(stockFolder)
-    }
-    if(!fs.existsSync(stockFolder + temporaryFolder + '/')){
-        fs.mkdirSync(stockFolder + temporaryFolder + '/')
-    }
+
+    await initFolders();
+
     let tmpZipStream = fs.createWriteStream(stockFolder + temporaryFolder + '/' + archiveName);
+    console.log('https://' + `${githubUrl}` + archiveSuffix);
     const response = await axios({
         method: "get",
         url: 'https://' + `${githubUrl}` + archiveSuffix,
         responseType: "stream",
-        headers:{
-            "Authorization":'token ' + `${token}`
+        headers: {
+            "Authorization": 'token ' + `${token}`
         }
     })
 
     response.data.pipe(tmpZipStream);
 
-
     return new Promise((resolve, reject) => {
-        tmpZipStream.on('finish', async ()=>{
+        tmpZipStream.on('finish', async () => {
             const zip = new AdmZip(stockFolder + temporaryFolder + '/' + archiveName);
             await zip.extractAllTo(stockFolder, true);
             await rimraf.sync(stockFolder + temporaryFolder + '/');
@@ -127,79 +137,76 @@ const run = async () => {
     );
 
     if (!isRepoExists) {
-        const askRepo = prompt({infinite: false});
-        const askPrivate = prompt({infinite: false});
-        const askToken = prompt({infinite: false});
-        const askIsPrivate = definitions.question.clone({
-            key: 'isPrivateRepo',
-            parameters: [chalk.yellow(
-                'Is your repository private?: (Type "y" if yes or "n" if no) '
-            )],
-            infinite: false,
-            required: true,
-            repeat: false,
-            message: '%s',
-            restore: false
-        });
+        const ask = prompt({infinite: false});
 
-        const askForToken = definitions.question.clone({
-            key: 'token',
-            parameters: [chalk.yellow(
-                'Type your personal authorization token: '
-            )],
-            infinite: false,
-            required: true,
-            repeat: false,
-            message: '%s',
-            restore: false
-        });
+        await new Promise((resolve, reject) => {
 
-        const githubRepoAsk = definitions.question.clone(
-            {
-                key: 'githubUrl',
+            const askIsPrivate = definitions.question.clone({
+                key: 'isPrivateRepo',
                 parameters: [chalk.yellow(
-                    'Type github stock url: '
+                    'Is your repository private?: (Type "y" if yes or "n" if no) '
                 )],
                 infinite: false,
                 required: true,
                 repeat: false,
                 message: '%s',
                 restore: false
-            }
-        );
+            });
 
+            const askForToken = definitions.question.clone({
+                key: 'token',
+                parameters: [chalk.yellow(
+                    'Type your personal authorization token: '
+                )],
+                infinite: false,
+                required: true,
+                repeat: false,
+                message: '%s',
+                restore: false
+            });
 
-        await new Promise((resolve, reject) => {
-            askPrivate.run([askIsPrivate], async (err, res) => {
+            const githubRepoAsk = definitions.question.clone(
+                {
+                    key: 'githubUrl',
+                    parameters: [chalk.yellow(
+                        'Type github stock url: '
+                    )],
+                    infinite: false,
+                    required: true,
+                    repeat: false,
+                    message: '%s',
+                    restore: false
+                }
+            );
+
+            ask.run([askIsPrivate], async (err, res) => {
                 if (err) {
                     reject(err);
                 }
                 if (res && res.map) {
                     const {isPrivateRepo} = res.map;
                     if (isPrivateRepo == 'y') {
-                        askRepo.run([githubRepoAsk], async (err, res) => {
+                        ask.run([askForToken], async (err, res) => {
                             if (err) {
                                 reject(err);
                             }
                             if (res && res.map) {
-                                const {githubUrl} = res.map;
-                                askToken.run([askForToken], async (err, res) => {
+                                const {token} = res.map;
+                                console.log(token);
+                                ask.run([githubRepoAsk], async (err, res) => {
                                     if (err) {
                                         reject(err);
                                     }
                                     if (res && res.map) {
-                                        const {token} = res.map;
-                                        const status = new Spinner('Downloading stock repository...');
+                                        const {githubUrl} = res.map;
+                                        console.log(githubUrl);
+                                        const status = new Spinner('Downloading stock repository...\n');
 
                                         status.start();
-
                                         await downloadRepo(githubUrl, token);
-
                                         status.stop();
 
-
                                         await readStockContent();
-
 
                                         if (!isConfigExists) {
                                             config = {
@@ -214,10 +221,8 @@ const run = async () => {
                                 });
                             }
                         });
-
-
                     } else {
-                        askRepo.run([githubRepoAsk], async (err, res) => {
+                        ask.run([githubRepoAsk], async (err, res) => {
                             if (err) {
                                 reject(err);
                             }
@@ -226,16 +231,10 @@ const run = async () => {
                                 const status = new Spinner('Downloading stock repository...\n');
 
                                 status.start();
-                                await new Promise((resolve, reject) => {
-                                    downloadRepo(githubUrl);
-                                    resolve();
-                                });
+                                await downloadRepo(githubUrl);
                                 status.stop();
 
-
-                                await  readStockContent();
-
-
+                                await readStockContent();
 
                                 if (!isConfigExists) {
                                     config = {
@@ -246,14 +245,13 @@ const run = async () => {
                                 }
 
                                 resolve();
-
                             }
                         });
                     }
                 }
+
             });
         });
-
     }
 
     const ps = prompt({infinite: true});
