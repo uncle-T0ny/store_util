@@ -33,48 +33,37 @@ marked.setOptions({
 
 let stockContent = '';
 let config;
-
-
 const downloadRepo = async (githubUrl, token) => {
-    try {
-        if (!fs.existsSync(stockFolder)) {
-            fs.mkdirSync(stockFolder)
-        }
-        if (!fs.existsSync(stockFolder + temporaryFolder + '/')) {
-            fs.mkdirSync(stockFolder + temporaryFolder + '/')
-        }
-    } catch (err) {
-        console.log(err);
+    if(!fs.existsSync(stockFolder)){
+        fs.mkdirSync(stockFolder)
     }
-
-    await axios({
+    if(!fs.existsSync(stockFolder + temporaryFolder + '/')){
+        fs.mkdirSync(stockFolder + temporaryFolder + '/')
+    }
+    let tmpZipStream = fs.createWriteStream(stockFolder + temporaryFolder + '/' + archiveName);
+    const response = await axios({
         method: "get",
-        url:`${githubUrl}` + archiveSuffix,
+        url: 'https://' + `${githubUrl}` + archiveSuffix,
         responseType: "stream",
-        headers: {
-            "Authorization": 'token ' + `${token}`
-        },
-        async: true
-    }).then((response) => {
-        const tmpZipStream = fs.createWriteStream(stockFolder + temporaryFolder + '/' + archiveName);
-        response.data.pipe(tmpZipStream);
-        tmpZipStream.on('close', async () => {
-            var zip;
-            try {
-                console.log('Unzip')
-                zip = new AdmZip(stockFolder + temporaryFolder + '/' + archiveName);
-                await zip.extractAllTo(stockFolder, true);
-                console.log('Deleting folder');
-                await rimraf.sync(stockFolder + temporaryFolder + '/');
-            } catch (e) {
-                console.log('Can not create zip, bad data', e);
-            }
-            console.log('end unzip');
+        headers:{
+            "Authorization":'token ' + `${token}`
+        }
+    })
+
+    response.data.pipe(tmpZipStream);
+
+
+    return new Promise((resolve, reject) => {
+        tmpZipStream.on('finish', async ()=>{
+            const zip = new AdmZip(stockFolder + temporaryFolder + '/' + archiveName);
+            await zip.extractAllTo(stockFolder, true);
+            await rimraf.sync(stockFolder + temporaryFolder + '/');
+            resolve();
         });
-        console.log('end');
+        tmpZipStream.on('error', reject)
     });
 
-};
+}
 
 const readStockContent = async () => {
     const stockPath = `${stockFolder}` + "stock2-master";
@@ -203,10 +192,9 @@ const run = async () => {
                                         const status = new Spinner('Downloading stock repository...');
 
                                         status.start();
-                                        const downloading = await new Promise(async (resolve, reject) => {
-                                            await downloadRepo(githubUrl, token);
-                                            resolve();
-                                        });
+
+                                        await downloadRepo(githubUrl, token);
+
                                         status.stop();
 
 
@@ -238,7 +226,7 @@ const run = async () => {
                                 const status = new Spinner('Downloading stock repository...\n');
 
                                 status.start();
-                                const downloading = await new Promise((resolve, reject) => {
+                                await new Promise((resolve, reject) => {
                                     downloadRepo(githubUrl);
                                     resolve();
                                 });
