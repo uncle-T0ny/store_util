@@ -56,7 +56,7 @@ const sendRequest = async (githubUrl, token) => {
         }
     }) : await axios({
         method: "get",
-        url: 'https://' + `${githubUrl}` + archiveSuffix,
+        url:`${githubUrl}` + archiveSuffix,
         responseType: "stream"
     });
 }
