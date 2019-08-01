@@ -46,20 +46,28 @@ const initFolders = async () => {
     });
 }
 
+const sendRequest = async (githubUrl, token) => {
+    return token ? await axios({
+        method: "get",
+        url: 'https://' + `${githubUrl}` + archiveSuffix,
+        responseType: "stream",
+        headers: {
+            "Authorization": 'token ' + `${token}`
+        }
+    }) : await axios({
+        method: "get",
+        url: 'https://' + `${githubUrl}` + archiveSuffix,
+        responseType: "stream"
+    });
+}
+
 const downloadRepo = async (githubUrl, token) => {
 
     await initFolders();
 
     let tmpZipStream = fs.createWriteStream(stockFolder + temporaryFolder + '/' + archiveName);
 
-    const response = await axios({
-        method: "get",
-        url:`${githubUrl}` + archiveSuffix,
-        responseType: "stream",
-        headers: {
-            "Authorization": 'token ' + `${token}`
-        }
-    })
+    const response = await sendRequest(githubUrl, token);
 
     response.data.pipe(tmpZipStream);
 
@@ -72,7 +80,6 @@ const downloadRepo = async (githubUrl, token) => {
         });
         tmpZipStream.on('error', reject)
     });
-
 }
 
 const readStockContent = async () => {
@@ -139,33 +146,22 @@ const run = async () => {
     if (!isRepoExists) {
         const ask = prompt({infinite: false});
 
-        await new Promise((resolve, reject) => {
-
-            const askIsPrivate = definitions.question.clone({
-                key: 'isPrivateRepo',
+        const gitQuestions = [
+            definitions.question.clone({
+                key: 'isPrivate',
                 parameters: [chalk.yellow(
                     'Is your repository private?: (Type "y" if yes or "n" if no) '
                 )],
+                choices: ['y', 'n'],
                 infinite: false,
                 required: true,
                 repeat: false,
                 message: '%s',
-                restore: false
-            });
+                restore: false,
+                type: 'checkbox'
+            }),
 
-            const askForToken = definitions.question.clone({
-                key: 'token',
-                parameters: [chalk.yellow(
-                    'Type your personal authorization token: '
-                )],
-                infinite: false,
-                required: true,
-                repeat: false,
-                message: '%s',
-                restore: false
-            });
-
-            const githubRepoAsk = definitions.question.clone(
+            definitions.question.clone(
                 {
                     key: 'githubUrl',
                     parameters: [chalk.yellow(
@@ -177,79 +173,44 @@ const run = async () => {
                     message: '%s',
                     restore: false
                 }
-            );
+            )
+        ];
 
-            ask.run([askIsPrivate], async (err, res) => {
+        const askToken = definitions.question.clone({
+            key: 'token',
+            parameters: [chalk.yellow(
+                'Type your personal authorization token: '
+            )],
+            infinite: false,
+            required: true,
+            repeat: false,
+            message: '%s',
+            restore: false
+        })
+
+        await new Promise((resolve, reject) => {
+            ask.run(gitQuestions, async (err, res) => {
                 if (err) {
-                    reject(err);
+                    reject();
                 }
-                if (res && res.map) {
-                    const {isPrivateRepo} = res.map;
-                    if (isPrivateRepo == 'y') {
-                        ask.run([askForToken], async (err, res) => {
-                            if (err) {
-                                reject(err);
-                            }
-                            if (res && res.map) {
-                                const {token} = res.map;
-                                console.log(token);
-                                ask.run([githubRepoAsk], async (err, res) => {
-                                    if (err) {
-                                        reject(err);
-                                    }
-                                    if (res && res.map) {
-                                        const {githubUrl} = res.map;
-                                        console.log(githubUrl);
-                                        const status = new Spinner('Downloading stock repository...\n');
-
-                                        status.start();
-                                        await downloadRepo(githubUrl, token);
-                                        status.stop();
-
-                                        await readStockContent();
-
-                                        if (!isConfigExists) {
-                                            config = {
-                                                repoUrl: githubUrl,
-                                                token: token
-                                            };
-                                            fs.writeFileSync(stockConfigFilePath, JSON.stringify(config));
-                                        }
-
-                                        resolve();
-                                    }
-                                });
-                            }
-                        });
-                    } else {
-                        ask.run([githubRepoAsk], async (err, res) => {
-                            if (err) {
-                                reject(err);
-                            }
-                            if (res && res.map) {
-                                const {githubUrl} = res.map;
-                                const status = new Spinner('Downloading stock repository...\n');
-
-                                status.start();
-                                await downloadRepo(githubUrl);
-                                status.stop();
-
-                                await readStockContent();
-
-                                if (!isConfigExists) {
-                                    config = {
-                                        repoUrl: githubUrl,
-                                        token: null
-                                    };
-                                    fs.writeFileSync(stockConfigFilePath, JSON.stringify(config));
-                                }
-
-                                resolve();
-                            }
-                        });
-                    }
+                const {isPrivate} = res.map;
+                if (isPrivate == 'y') {
+                    const {githubUrl} = res.map;
+                    ask.run([askToken], async (err, res) => {
+                        if (err) {
+                            reject();
+                        }
+                        if (res && res.map) {
+                            const {token} = res.map;
+                            await downloadAndSave(githubUrl, token, isConfigExists);
+                            resolve();
+                        }
+                    });
+                } else {
+                    const {githubUrl} = res.map;
+                    await downloadAndSave(githubUrl, null, isConfigExists);
+                    resolve();
                 }
-
             });
         });
     }
@@ -279,4 +240,23 @@ const run = async () => {
     });
 };
 
+const downloadAndSave = async (url, token, isConfigExists) => {
+    const status = new Spinner('Downloading stock repository...\n');
+
+    status.start();
+    await downloadRepo(url, token);
+    status.stop();
+
+    await readStockContent();
+
+    if (!isConfigExists) {
+        config = {
+            repoUrl: url,
+            token: token
+        };
+        fs.writeFileSync(stockConfigFilePath, JSON.stringify(config));
+    }
+}
+
 run();
+
