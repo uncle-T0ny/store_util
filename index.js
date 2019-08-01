@@ -34,52 +34,51 @@ marked.setOptions({
 let stockContent = '';
 let config;
 
-const initFolders = async () => {
-    return new Promise((resolve, reject) => {
-        if (!fs.existsSync(stockFolder)) {
-            fs.mkdirSync(stockFolder)
-        }
-        if (!fs.existsSync(stockFolder + temporaryFolder + '/')) {
-            fs.mkdirSync(stockFolder + temporaryFolder + '/')
-        }
-        resolve();
-    });
+const initFolders = () => {
+    if (!fs.existsSync(stockFolder)) {
+        fs.mkdirSync(stockFolder)
+    }
+    if (!fs.existsSync(stockFolder + temporaryFolder + '/')) {
+        fs.mkdirSync(stockFolder + temporaryFolder + '/')
+    }
 }
 
 const sendRequest = async (githubUrl, token) => {
-    return token ? await axios({
+    return token ? axios({
         method: "get",
-        url: 'https://' + `${githubUrl}` + archiveSuffix,
+        url: `${githubUrl}` + archiveSuffix,
         responseType: "stream",
         headers: {
             "Authorization": 'token ' + `${token}`
         }
-    }) : await axios({
+    }) : axios({
         method: "get",
-        url:`${githubUrl}` + archiveSuffix,
+        url: `${githubUrl}` + archiveSuffix,
         responseType: "stream"
     });
 }
 
 const downloadRepo = async (githubUrl, token) => {
-
-    await initFolders();
-
     let tmpZipStream = fs.createWriteStream(stockFolder + temporaryFolder + '/' + archiveName);
-
     const response = await sendRequest(githubUrl, token);
-
     response.data.pipe(tmpZipStream);
-
     return new Promise((resolve, reject) => {
         tmpZipStream.on('finish', async () => {
-            const zip = new AdmZip(stockFolder + temporaryFolder + '/' + archiveName);
-            await zip.extractAllTo(stockFolder, true);
-            await rimraf.sync(stockFolder + temporaryFolder + '/');
             resolve();
-        });
-        tmpZipStream.on('error', reject)
+        })
     });
+}
+
+const unzip = async () => {
+    const zip = new AdmZip(stockFolder + temporaryFolder + '/' + archiveName);
+    await zip.extractAllTo(stockFolder, true);
+    await rimraf.sync(stockFolder + temporaryFolder + '/');
+}
+
+const getRepositoryFromGit = async (githubUrl, token) => {
+    initFolders();
+    await downloadRepo(githubUrl, token);
+    await unzip();
 }
 
 const readStockContent = async () => {
@@ -120,7 +119,7 @@ const run = async () => {
         }
 
         status.start();
-        await downloadRepo(config.repoUrl, config.token);
+        await getRepositoryFromGit(config.repoUrl, config.token);
         status.stop();
     }
 
@@ -244,7 +243,7 @@ const downloadAndSave = async (url, token, isConfigExists) => {
     const status = new Spinner('Downloading stock repository...\n');
 
     status.start();
-    await downloadRepo(url, token);
+    await getRepositoryFromGit(url, token);
     status.stop();
 
     await readStockContent();
