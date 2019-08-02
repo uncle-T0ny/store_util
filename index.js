@@ -26,6 +26,7 @@ const stockConfigFilePath = `${homedir}/.stock/config.json`;
 const temporaryFolder = 'temp';
 const archiveSuffix = '/archive/master.zip';
 const archiveName = 'stock2-master.zip';
+const folderName = 'stock2-master';
 
 marked.setOptions({
     renderer: new TerminalRenderer()
@@ -44,17 +45,20 @@ const initFolders = () => {
 }
 
 const sendRequest = async (githubUrl, token) => {
-    return token ? axios({
-        method: "get",
-        url: `${githubUrl}` + archiveSuffix,
-        responseType: "stream",
-        headers: {
-            "Authorization": 'token ' + `${token}`
-        }
-    }) : axios({
-        method: "get",
-        url: `${githubUrl}` + archiveSuffix,
-        responseType: "stream"
+    if(token){
+        return axios({
+            method: 'get',
+            url: `${githubUrl}${archiveSuffix}`,
+            responseType: 'stream',
+            headers: {
+                'Authorization': `token ${token}`
+            }
+        });
+    }
+    return axios({
+        method: 'get',
+        url: `${githubUrl}${archiveSuffix}`,
+        responseType: 'stream'
     });
 }
 
@@ -82,7 +86,7 @@ const getRepositoryFromGit = async (githubUrl, token) => {
 }
 
 const readStockContent = async () => {
-    const stockPath = `${stockFolder}` + "stock2-master";
+    const stockPath = `${stockFolder}${folderName}`;
 
     stockContent = await readFiles(stockPath);
 };
@@ -146,20 +150,6 @@ const run = async () => {
         const ask = prompt({infinite: false});
 
         const gitQuestions = [
-            definitions.question.clone({
-                key: 'isPrivate',
-                parameters: [chalk.yellow(
-                    'Is your repository private?: (Type "y" if yes or "n" if no) '
-                )],
-                choices: ['y', 'n'],
-                infinite: false,
-                required: true,
-                repeat: false,
-                message: '%s',
-                restore: false,
-                type: 'checkbox'
-            }),
-
             definitions.question.clone(
                 {
                     key: 'githubUrl',
@@ -172,7 +162,20 @@ const run = async () => {
                     message: '%s',
                     restore: false
                 }
-            )
+            ),
+            definitions.question.clone({
+                key: 'isPrivate',
+                parameters: [chalk.yellow(
+                    'Is your repository private?: (Type "y" if yes or "n" if no) '
+                )],
+                choices: ['y', 'n'],
+                infinite: false,
+                required: true,
+                repeat: false,
+                message: '%s',
+                restore: false,
+                type: 'checkbox'
+            })
         ];
 
         const askToken = definitions.question.clone({
@@ -192,9 +195,9 @@ const run = async () => {
                 if (err) {
                     reject();
                 }
+                const {githubUrl} = res.map;
                 const {isPrivate} = res.map;
                 if (isPrivate == 'y') {
-                    const {githubUrl} = res.map;
                     ask.run([askToken], async (err, res) => {
                         if (err) {
                             reject();
@@ -206,7 +209,6 @@ const run = async () => {
                         }
                     });
                 } else {
-                    const {githubUrl} = res.map;
                     await downloadAndSave(githubUrl, null, isConfigExists);
                     resolve();
                 }
