@@ -25,8 +25,9 @@ const stockFolder = `${homedir}/.stock/`;
 const stockConfigFilePath = `${homedir}/.stock/config.json`;
 const temporaryFolder = 'temp';
 const archiveSuffix = '/archive/master.zip';
-const archiveName = 'stock2-master.zip';
-const folderName = 'stock2-master';
+const archiveNameSuffix = '-master.zip';
+const folderNameSuffix = '-master';
+const githubNativeUrl = 'https://github.com/';
 
 marked.setOptions({
     renderer: new TerminalRenderer()
@@ -45,10 +46,14 @@ const initFolders = () => {
 }
 
 const sendRequest = async (githubUrl, token) => {
-    if(token){
+    let fullUrl = `${githubUrl}${archiveSuffix}`;
+    console.log(`Current repo URL: ${fullUrl}`);
+
+    if (token) {
+        console.log('Token is:' + `token ${token}`);
         return axios({
             method: 'get',
-            url: `${githubUrl}${archiveSuffix}`,
+            url: fullUrl,
             responseType: 'stream',
             headers: {
                 'Authorization': `token ${token}`
@@ -57,13 +62,15 @@ const sendRequest = async (githubUrl, token) => {
     }
     return axios({
         method: 'get',
-        url: `${githubUrl}${archiveSuffix}`,
+        url: fullUrl,
         responseType: 'stream'
     });
 }
 
-const downloadRepo = async (githubUrl, token) => {
-    let tmpZipStream = fs.createWriteStream(stockFolder + temporaryFolder + '/' + archiveName);
+const downloadRepo = async (githubUrl, token, archiveName) => {
+    let archivePath = `${stockFolder}${temporaryFolder}/${archiveName}${archiveNameSuffix}`;
+    console.log(`Archive path is : ${archivePath}`);
+    let tmpZipStream = fs.createWriteStream(archivePath);
     const response = await sendRequest(githubUrl, token);
     response.data.pipe(tmpZipStream);
     return new Promise((resolve, reject) => {
@@ -73,21 +80,23 @@ const downloadRepo = async (githubUrl, token) => {
     });
 }
 
-const unzip = async () => {
-    const zip = new AdmZip(stockFolder + temporaryFolder + '/' + archiveName);
+const unzip = async (archiveName) => {
+    const zipPath = `${stockFolder}${temporaryFolder}/${archiveName}${archiveNameSuffix}`;
+    console.log(`Zip archive: ${zipPath}`);
+    const zip = new AdmZip(zipPath);
     await zip.extractAllTo(stockFolder, true);
-    await rimraf.sync(stockFolder + temporaryFolder + '/');
+    await rimraf.sync(`${stockFolder}${temporaryFolder}/`);
 }
 
-const getRepositoryFromGit = async (githubUrl, token) => {
+const getRepositoryFromGit = async (githubUrl, token, archiveName) => {
     initFolders();
-    await downloadRepo(githubUrl, token);
-    await unzip();
+    await downloadRepo(githubUrl, token, archiveName);
+    await unzip(archiveName);
 }
 
-const readStockContent = async () => {
-    const stockPath = `${stockFolder}${folderName}`;
-
+const readStockContent = async (archiveName) => {
+    const stockPath = `${stockFolder}${archiveName}${folderNameSuffix}`;
+    console.log(`Folder name: ${stockPath}`);
     stockContent = await readFiles(stockPath);
 };
 
@@ -105,6 +114,14 @@ const printMatches = (val) => {
     });
 };
 
+const getConfig = function (isConfigExists) {
+    if (!isConfigExists) {
+        console.log(`Config folder not found.`);
+        process.exit();
+    } else {
+        config = JSON.parse(fs.readFileSync(stockConfigFilePath));
+    }
+}
 
 const run = async () => {
 
@@ -115,20 +132,15 @@ const run = async () => {
     if (isUpdateRepo && isRepoExists) {
         const status = new Spinner('Updating stock repository...');
 
-        if (!isConfigExists) {
-            console.log(`Config folder not found.`);
-            process.exit();
-        } else {
-            config = JSON.parse(fs.readFileSync(stockConfigFilePath));
-        }
-
+        config = getConfig(isConfigExists);
+        const archiveName = getArchiveName(config.repoUrl);
         status.start();
-        await getRepositoryFromGit(config.repoUrl, config.token);
+        await getRepositoryFromGit(config.repoUrl, config.token, archiveName);
         status.stop();
     }
 
     if (isRepoExists) {
-        await readStockContent();
+        await readStockContent(getArchiveName(getConfig(isConfigExists).repoUrl));
     }
 
     // search notes by tags and exit
@@ -148,47 +160,8 @@ const run = async () => {
 
     if (!isRepoExists) {
         const ask = prompt({infinite: false});
+        const gitQuestions = initBasicQuestions();
 
-        const gitQuestions = [
-            definitions.question.clone(
-                {
-                    key: 'githubUrl',
-                    parameters: [chalk.yellow(
-                        'Type github stock url: '
-                    )],
-                    infinite: false,
-                    required: true,
-                    repeat: false,
-                    message: '%s',
-                    restore: false
-                }
-            ),
-            definitions.question.clone({
-                key: 'isPrivate',
-                parameters: [chalk.yellow(
-                    'Is your repository private?: (Type "y" if yes or "n" if no) '
-                )],
-                choices: ['y', 'n'],
-                infinite: false,
-                required: true,
-                repeat: false,
-                message: '%s',
-                restore: false,
-                type: 'checkbox'
-            })
-        ];
-
-        const askToken = definitions.question.clone({
-            key: 'token',
-            parameters: [chalk.yellow(
-                'Type your personal authorization token: '
-            )],
-            infinite: false,
-            required: true,
-            repeat: false,
-            message: '%s',
-            restore: false
-        })
 
         await new Promise((resolve, reject) => {
             ask.run(gitQuestions, async (err, res) => {
@@ -197,20 +170,17 @@ const run = async () => {
                 }
                 const {githubUrl} = res.map;
                 const {isPrivate} = res.map;
-                if (isPrivate == 'y') {
-                    ask.run([askToken], async (err, res) => {
-                        if (err) {
-                            reject();
-                        }
-                        if (res && res.map) {
-                            const {token} = res.map;
-                            await downloadAndSave(githubUrl, token, isConfigExists);
-                            resolve();
-                        }
-                    });
-                } else {
-                    await downloadAndSave(githubUrl, null, isConfigExists);
-                    resolve();
+
+                try {
+                    if (isPrivate == 'y') {
+                        await downloadPrivateRepository(resolve, reject, githubUrl, isConfigExists, ask);
+                    } else {
+                        await downloadAndSave(githubUrl, null, isConfigExists);
+                        resolve();
+                    }
+                } catch (e) {
+                    console.log('Error:' + e);
+                    process.exit();
                 }
             });
         });
@@ -241,14 +211,28 @@ const run = async () => {
     });
 };
 
+const downloadPrivateRepository = async (resolve, reject, githubUrl, isConfigExists, ask) => {
+    const askToken = initTokenQuestion();
+    ask.run([askToken], async (err, res) => {
+        if (err) {
+            reject();
+        }
+        if (res && res.map) {
+            const {token} = res.map;
+            await downloadAndSave(githubUrl, token, isConfigExists);
+            resolve();
+        }
+    });
+}
+
 const downloadAndSave = async (url, token, isConfigExists) => {
     const status = new Spinner('Downloading stock repository...\n');
-
+    const archiveName = getArchiveName(url);
     status.start();
-    await getRepositoryFromGit(url, token);
+    await getRepositoryFromGit(url, token, archiveName);
     status.stop();
 
-    await readStockContent();
+    await readStockContent(archiveName);
 
     if (!isConfigExists) {
         config = {
@@ -257,6 +241,55 @@ const downloadAndSave = async (url, token, isConfigExists) => {
         };
         fs.writeFileSync(stockConfigFilePath, JSON.stringify(config));
     }
+}
+
+const getArchiveName = function (githubUrl) {
+    return githubUrl.replace(githubNativeUrl).replace(/[^/]*/, "").replace(/[/]/, "");
+}
+
+const initBasicQuestions = function () {
+    return [
+        definitions.question.clone(
+            {
+                key: 'githubUrl',
+                parameters: [chalk.yellow(
+                    'Type github stock url: '
+                )],
+                infinite: false,
+                required: true,
+                repeat: false,
+                message: '%s',
+                restore: false
+            }
+        ),
+        definitions.question.clone({
+            key: 'isPrivate',
+            parameters: [chalk.yellow(
+                'Is your repository private?: (Type "y" if yes or "n" if no) '
+            )],
+            choices: ['y', 'n'],
+            infinite: false,
+            required: true,
+            repeat: false,
+            message: '%s',
+            restore: false,
+            type: 'checkbox'
+        })
+    ];
+}
+
+const initTokenQuestion = function () {
+    return definitions.question.clone({
+        key: 'token',
+        parameters: [chalk.yellow(
+            'Type your personal authorization token: '
+        )],
+        infinite: false,
+        required: true,
+        repeat: false,
+        message: '%s',
+        restore: false
+    })
 }
 
 run();
