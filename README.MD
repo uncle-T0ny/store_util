@@ -39,10 +39,13 @@ sut
 ```
 
 2. The util will ask github repository, type your own or https://github.com/uncle-T0ny/stock2
+  . Then it will ask you, is your repository private? 
 
-3. Then you can user util typing with searching notes typing tag names
+3. If your repository is private - util will ask you access token. You can generate oauth access token using this instruction: https://docs.cachethq.io/docs/github-oauth-token
 
-4. You can update the cached repository from github executing
+4. Then you can user util typing with searching notes typing tag names
+
+5. You can update the cached repository from github executing
 ```
 sut --update
 ```
