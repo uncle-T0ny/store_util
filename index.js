@@ -96,7 +96,6 @@ const getRepositoryFromGit = async (githubUrl, token, archiveName) => {
 
 const readStockContent = async (archiveName) => {
     const stockPath = `${stockFolder}${archiveName}${folderNameSuffix}`;
-    console.log(`Folder name: ${stockPath}`);
     stockContent = await readFiles(stockPath);
 };
 
@@ -132,7 +131,7 @@ const run = async () => {
     if (isUpdateRepo && isRepoExists) {
         const status = new Spinner('Updating stock repository...');
 
-        config = getConfig(isConfigExists);
+        getConfig(isConfigExists);
         const archiveName = getArchiveName(config.repoUrl);
         status.start();
         await getRepositoryFromGit(config.repoUrl, config.token, archiveName);
@@ -140,7 +139,8 @@ const run = async () => {
     }
 
     if (isRepoExists) {
-        await readStockContent(getArchiveName(getConfig(isConfigExists).repoUrl));
+        getConfig(isConfigExists);
+        await readStockContent(getArchiveName(config.repoUrl));
     }
 
     // search notes by tags and exit
