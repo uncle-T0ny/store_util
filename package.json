@@ -27,7 +27,7 @@
     "figlet": "^1.2.0",
     "figures": "^2.0.0",
     "install": "^0.12.1",
-    "marked": "^0.5.1",
+    "marked": "^0.7.0",
     "marked-terminal": "^3.1.1",
     "minimist": "^1.2.0",
     "node-dir": "^0.1.17",
